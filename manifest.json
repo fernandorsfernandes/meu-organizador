@@ -2,7 +2,7 @@
   "name": "Meu Organizador",
   "short_name": "Organizador",
   "description": "Controle suas finanças pessoais",
-  "start_url": "/",
+  "start_url": "/meu-organizador/",
   "display": "standalone",
   "background_color": "#171614",
   "theme_color": "#01696f",
@@ -65,5 +65,6 @@
       "type": "image/png",
       "form_factor": "narrow"
     }
-  ]
+  ],
+  "scope": "/meu-organizador/"
 }

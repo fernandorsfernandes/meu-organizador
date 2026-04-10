@@ -1,13 +1,15 @@
-const CACHE = 'meu-organizador-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json',
-  '/icons/icon-192.png', '/icons/icon-512.png',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap'
+const CACHE = 'meu-organizador-v2';
+const ASSETS = [
+  '/meu-organizador/',
+  '/meu-organizador/index.html',
+  '/meu-organizador/manifest.json',
+  '/meu-organizador/icons/icon-192.png',
+  '/meu-organizador/icons/icon-512.png'
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS.slice(0,4)))
+    caches.open(CACHE).then(c => c.addAll(ASSETS))
       .then(() => self.skipWaiting())
   );
 });
@@ -29,7 +31,7 @@ self.addEventListener('fetch', e => {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
         return res;
-      }).catch(() => caches.match('/index.html'));
+      }).catch(() => caches.match('/meu-organizador/index.html'));
     })
   );
 });
