@@ -3,9 +3,10 @@
   "short_name": "Organizador",
   "description": "Controle suas finanças pessoais",
   "start_url": "/meu-organizador/",
+  "scope": "/meu-organizador/",
   "display": "standalone",
   "background_color": "#171614",
-  "theme_color": "#01696f",
+  "theme_color": "#4f98a3",
   "orientation": "portrait-primary",
   "lang": "pt-BR",
   "icons": [
@@ -57,14 +58,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "screenshots": [
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
-  "scope": "/meu-organizador/"
+  ]
 }

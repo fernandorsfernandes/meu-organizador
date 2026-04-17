@@ -2,33 +2,10 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Meu Organizador">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#01696f" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<style>
-  /* Splash screen iOS */
-  #pwa-splash {
-    position: fixed; inset: 0; z-index: 99999;
-    background: #171614;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 20px;
-    transition: opacity .5s ease .3s;
-  }
-  #pwa-splash.hide { opacity: 0; pointer-events: none; }
-  #pwa-splash svg { animation: splashpulse 1.2s ease-in-out infinite; }
-  #pwa-splash .splash-name { font-family: 'Satoshi', sans-serif; font-size: 1.5rem; font-weight: 700; color: #4f98a3; letter-spacing: -.02em; }
-  #pwa-splash .splash-sub { font-family: 'Satoshi', sans-serif; font-size: .875rem; color: #797876; }
-  @keyframes splashpulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:.8} }
-</style>
 <title>Meu Organizador</title>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -147,27 +124,19 @@ select option{background:var(--surf)}
   .main{padding-bottom:70px}
   .month-label{min-width:100px;font-size:var(--xs)}
 }
+
+/* PWA standalone safe areas */
+@media all and (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); }
+  .topbar { padding-top: calc(var(--s4) + env(safe-area-inset-top)); }
+  .mob-nav { padding-bottom: calc(var(--s2) + env(safe-area-inset-bottom)); }
+  .sidebar { padding-top: calc(var(--s6) + env(safe-area-inset-top)); }
+}
+html, body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+
 </style>
 </head>
 <body>
-
-<div id="pwa-splash">
-  <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-    <rect width="80" height="80" rx="20" fill="#1c1b19"/>
-    <path d="M18 56 L30 40 L42 47 L54 28 L62 22" stroke="#4f98a3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="62" cy="22" r="5" fill="#4f98a3"/>
-  </svg>
-  <span class="splash-name">Meu Organizador</span>
-  <span class="splash-sub">Carregando...</span>
-</div>
-<script>
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const s = document.getElementById('pwa-splash');
-      if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 600); }
-    }, 900);
-  });
-</script>
 <div class="toast-area" id="toastArea"></div>
 <div class="app">
 
@@ -278,6 +247,13 @@ select option{background:var(--surf)}
             <option value="corrente">Conta Corrente</option><option value="poupanca">Poupança</option>
             <option value="cartao">Cartão de Crédito</option><option value="dinheiro">Dinheiro</option>
           </select></div>
+          <div class="form-field"><label>Repetição</label><select id="f-repeat" onchange="toggleRepeatCount()">
+            <option value="none">Sem repetição</option>
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensal</option>
+            <option value="yearly">Anual</option>
+          </select></div>
+          <div class="form-field" id="f-repeat-count-wrap" style="display:none"><label>Quantas vezes</label><input type="number" id="f-repeat-count" placeholder="Ex: 12" min="2" max="120" value="2"></div>
         </div>
         <div style="margin-top:var(--s6);display:flex;gap:var(--s3);flex-wrap:wrap">
           <button class="btn btn-primary" id="btn-add" onclick="addTransaction()">
@@ -367,6 +343,12 @@ select option{background:var(--surf)}
           <option value="corrente">Conta Corrente</option><option value="cartao">Cartão de Crédito</option>
           <option value="poupanca">Poupança</option><option value="dinheiro">Dinheiro</option>
         </select></div>
+        <div class="form-field"><label>Duração</label><select id="r-duracao">
+          <option value="forever">Indefinida (sempre)</option>
+          <option value="months">Por meses</option>
+          <option value="times">Por nº de vezes</option>
+        </select></div>
+        <div class="form-field" id="r-duracao-val-wrap" style="display:none"><label id="r-duracao-val-label">Quantos meses</label><input type="number" id="r-duracao-val" placeholder="Ex: 12" min="1" max="360"></div>
       </div>
       <button class="btn btn-primary" onclick="addRecurring()" style="margin-top:var(--s4)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -636,8 +618,15 @@ async function addTransaction(){
   const tx={id:uid(),type:tipo,amount:valor,description:desc,category:cat,date:data,account:conta,createdAt:Date.now()};
   await dbPut('transactions',tx);
   transactions.push(tx);
-  clearForm(); toast('Lançamento adicionado! ✓');
-  renderAll();
+  const repeat = document.getElementById('f-repeat').value;
+  const count = parseInt(document.getElementById('f-repeat-count').value) || 1;
+  if (repeat !== 'none' && count > 1) {
+    await addRepeatTransactions(tx, repeat, count);
+    toast(`Lançamento + ${count-1} repetições adicionados! ✓`);
+  } else {
+    toast('Lançamento adicionado! ✓');
+  }
+  clearForm(); renderAll();
 }
 
 async function deleteTx(id){
@@ -661,62 +650,186 @@ function clearForm(){
   document.getElementById('f-conta').value='corrente';
 }
 
-// ── NLP MELHORADO ───────────────────────────────────────────────────────────
-// Stopwords e palavras-chave a ignorar na extração de nome
-const STOPWORDS=new Set(['o','a','os','as','um','uma','uns','umas','de','do','da','dos','das','em','no','na','nos','nas','por','para','com','ao','à','aos','às','e','é','que','se','isso','ele','ela','paguei','gastei','comprei','recebi','ganhei','transferi','foi','hoje','ontem','amanhã','dia','mês','mes','semana','valor','reais','real','r$','rs','no','na','de','do','da']);
-const TYPE_KEYS={'gastei':'despesa','paguei':'despesa','comprei':'despesa','debitei':'despesa','saiu':'despesa','recebi':'receita','ganhei':'receita','salário':'receita','salario':'receita','freelance':'receita','renda':'receita'};
-const CAT_KEYS={'mercado':'alimentacao','supermercado':'alimentacao','almoço':'alimentacao','almoco':'alimentacao','jantar':'alimentacao','restaurante':'alimentacao','lanche':'alimentacao','comida':'alimentacao','farmácia':'saude','farmacia':'saude','médico':'saude','medico':'saude','saúde':'saude','saude':'saude','academia':'saude','remédio':'saude','remedio':'saude','aluguel':'moradia','condomínio':'moradia','condominio':'moradia','luz':'moradia','água':'moradia','agua':'moradia','gas':'moradia','gás':'moradia','internet':'moradia','uber':'transporte','taxi':'transporte','táxi':'transporte','gasolina':'transporte','combustível':'transporte','combustivel':'transporte','ônibus':'transporte','onibus':'transporte','metrô':'transporte','metro':'transporte','salário':'salario','salario':'salario','faculdade':'educacao','escola':'educacao','curso':'educacao','livro':'educacao','roupa':'roupas','tênis':'roupas','tenis':'roupas','calça':'roupas','camisa':'roupas','lazer':'lazer','cinema':'lazer','netflix':'lazer','streaming':'lazer','viagem':'lazer'};
+// ── NLP TOTALMENTE REESCRITO ─────────────────────────────────────────────────
+// Stopwords PT-BR expandidas
+const STOPWORDS = new Set([
+  'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das',
+  'em','no','na','nos','nas','por','para','com','ao','à','aos','às',
+  'e','é','que','se','isso','ele','ela','eu','meu','minha',
+  'paguei','gastei','comprei','recebi','ganhei','transferi','foi',
+  'hoje','ontem','amanhã','amanha','dia','mês','mes','semana',
+  'valor','reais','real','r$','rs','brl','pra'
+]);
 
-function parseNLP(text){
-  const raw=text.toLowerCase().trim();
-  const words=raw.split(/\s+/);
+// TIPO — palavras que indicam despesa ou receita
+const TYPE_KEYS = {
+  'gastei':'despesa','paguei':'despesa','comprei':'despesa','debitei':'despesa',
+  'saiu':'despesa','fiz':'despesa','usei':'despesa','coloquei':'despesa',
+  'recebi':'receita','ganhei':'receita','entrou':'receita','depositei':'receita',
+  'transferi':'receita','caiu':'receita'
+};
 
-  // tipo
-  let type='despesa';
-  for(const w of words){if(TYPE_KEYS[w]){type=TYPE_KEYS[w];break;}}
+// CONTA — detecta instrumento de pagamento
+const CONTA_KEYS = {
+  'cartao':'cartao','cartão':'cartao','credito':'cartao','crédito':'cartao',
+  'debito':'corrente','débito':'corrente','pix':'corrente','corrente':'corrente',
+  'conta':'corrente','banco':'corrente','transferencia':'corrente','transferência':'corrente',
+  'poupanca':'poupanca','poupança':'poupanca','dinheiro':'dinheiro','especie':'dinheiro',
+  'espécie':'dinheiro','cash':'dinheiro','boleto':'corrente','ted':'corrente','doc':'corrente'
+};
 
-  // valor — primeiro número encontrado
-  const numMatch=raw.match(/\d+([.,]\d{1,2})?/);
-  const amount=numMatch?parseFloat(numMatch[0].replace(',','.')):0;
+// CATEGORIA — dicionário ampliado com muitas variações
+const CAT_KEYS = {
+  // Alimentação
+  'mercado':'alimentacao','supermercado':'alimentacao','hortifruti':'alimentacao',
+  'padaria':'alimentacao','padaria':'alimentacao','açougue':'alimentacao','acougue':'alimentacao',
+  'almoço':'alimentacao','almoco':'alimentacao','jantar':'alimentacao','café':'alimentacao',
+  'cafe':'alimentacao','lanche':'alimentacao','pizza':'alimentacao','hamburguer':'alimentacao',
+  'hamburger':'alimentacao','restaurante':'alimentacao','comida':'alimentacao',
+  'refeição':'alimentacao','refeicao':'alimentacao','delivery':'alimentacao',
+  'ifood':'alimentacao','rappi':'alimentacao','uber eats':'alimentacao',
+  'sushi':'alimentacao','churrasco':'alimentacao','feira':'alimentacao',
+  'snack':'alimentacao','bar':'alimentacao','boteco':'alimentacao','botequim':'alimentacao',
+  'bistrô':'alimentacao','bistro':'alimentacao','cantina':'alimentacao','lanchonete':'alimentacao',
+  // Lazer
+  'lazer':'lazer','diversao':'lazer','diversão':'lazer','cinema':'lazer',
+  'teatro':'lazer','show':'lazer','festa':'lazer','balada':'lazer','clube':'lazer',
+  'netflix':'lazer','spotify':'lazer','prime':'lazer','disney':'lazer','hbo':'lazer',
+  'streaming':'lazer','jogo':'lazer','game':'lazer','playstation':'lazer','xbox':'lazer',
+  'viagem':'lazer','hotel':'lazer','passeio':'lazer','ingresso':'lazer',
+  'parque':'lazer','praia':'lazer','piscina':'lazer','esporte':'lazer',
+  // Transporte
+  'uber':'transporte','99':'transporte','taxi':'transporte','táxi':'transporte',
+  'gasolina':'transporte','combustivel':'transporte','combustível':'transporte',
+  'etanol':'transporte','diesel':'transporte','posto':'transporte',
+  'ônibus':'transporte','onibus':'transporte','metrô':'transporte','metro':'transporte',
+  'trem':'transporte','moto':'transporte','carro':'transporte','estacionamento':'transporte',
+  'pedágio':'transporte','pedagio':'transporte','manutenção':'transporte','revisao':'transporte',
+  'revisão':'transporte','seguro auto':'transporte',
+  // Moradia
+  'aluguel':'moradia','condomínio':'moradia','condominio':'moradia',
+  'iptu':'moradia','luz':'moradia','energia':'moradia','água':'moradia','agua':'moradia',
+  'gás':'moradia','gas':'moradia','internet':'moradia','telefone':'moradia',
+  'celular':'moradia','tv':'moradia','net':'moradia','claro':'moradia','vivo':'moradia',
+  'tim':'moradia','reparo':'moradia','reforma':'moradia','mobília':'moradia','mobilia':'moradia',
+  // Saúde
+  'farmácia':'saude','farmacia':'saude','remédio':'saude','remedio':'saude',
+  'médico':'saude','medico':'saude','consulta':'saude','dentista':'saude',
+  'exame':'saude','hospital':'saude','clínica':'saude','clinica':'saude',
+  'academia':'saude','plano':'saude','unimed':'saude','sulamerica':'saude',
+  'bradesco saude':'saude','amil':'saude','psicólogo':'saude','psicologo':'saude',
+  'terapia':'saude','nutricionista':'saude','fisioterapia':'saude',
+  // Educação
+  'faculdade':'educacao','escola':'educacao','curso':'educacao','livro':'educacao',
+  'material':'educacao','mensalidade':'educacao','uniforme':'educacao',
+  'udemy':'educacao','alura':'educacao','coursera':'educacao',
+  // Roupas
+  'roupa':'roupas','roupas':'roupas','camisa':'roupas','calça':'roupas','calca':'roupas',
+  'tênis':'roupas','tenis':'roupas','sapato':'roupas','vestido':'roupas',
+  'camiseta':'roupas','jaqueta':'roupas','casaco':'roupas',
+  // Receitas
+  'salário':'salario','salario':'salario','holerite':'salario',
+  'freelance':'freelance','freela':'freelance','projeto':'freelance',
+  'consultoria':'freelance','honorários':'freelance','honorarios':'freelance',
+  'dividendos':'freelance','aluguel recebido':'freelance'
+};
 
-  // data — "dia N" ou "amanhã" ou "ontem"
-  const today=new Date();
-  let date=today.toISOString().split('T')[0];
-  const diaMatch=raw.match(/\bdia\s+(\d{1,2})\b/);
-  if(diaMatch){
-    const day=parseInt(diaMatch[1]);
-    const d=new Date(selYear,selMonth,day);
-    date=d.toISOString().split('T')[0];
-  } else if(raw.includes('ontem')){
-    const d=new Date(today); d.setDate(d.getDate()-1); date=d.toISOString().split('T')[0];
-  } else if(raw.includes('amanhã')||raw.includes('amanha')){
-    const d=new Date(today); d.setDate(d.getDate()+1); date=d.toISOString().split('T')[0];
+// PREPOSIÇÕES que precedem o nome do lugar — útil para extrair descrição
+const PLACE_PREPS = new Set(['no','na','no','em','na','do','da','num','numa','pelo','pela']);
+
+function parseNLP(text) {
+  const raw = text.toLowerCase().trim();
+  const words = raw.split(/\s+/);
+
+  // ── TIPO ──
+  let type = 'despesa';
+  for (const w of words) { if (TYPE_KEYS[w]) { type = TYPE_KEYS[w]; break; } }
+
+  // ── VALOR — primeiro número (aceita 1.500 e 1500 e 1,50) ──
+  const numMatch = raw.match(/\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?\b|\b\d+\b/);
+  const amount = numMatch ? parseFloat(numMatch[0].replace(/\./g,'').replace(',','.')) : 0;
+
+  // ── DATA ──
+  const today = new Date();
+  let date = today.toISOString().split('T')[0];
+  const diaMatch = raw.match(/\bdia\s+(\d{1,2})\b/);
+  if (diaMatch) {
+    const d = new Date(selYear, selMonth, parseInt(diaMatch[1]));
+    date = d.toISOString().split('T')[0];
+  } else if (raw.includes('ontem')) {
+    const d = new Date(today); d.setDate(d.getDate()-1); date = d.toISOString().split('T')[0];
+  } else if (raw.includes('amanhã') || raw.includes('amanha')) {
+    const d = new Date(today); d.setDate(d.getDate()+1); date = d.toISOString().split('T')[0];
   }
 
-  // categoria — busca palavras no texto
-  let category='outros';
-  for(const w of words){if(CAT_KEYS[w]){category=CAT_KEYS[w];break;}}
-  if(category==='outros'){for(const [k,v] of Object.entries(CAT_KEYS)){if(raw.includes(k)){category=v;break;}}}
-  if(type==='receita' && category==='outros') category='salario';
-
-  // descrição — extrai tokens relevantes:
-  // remove tipo-chave, número, "dia N", stopwords, e pega primeiras palavras
-  let descWords=[];
-  let skipNext=false;
-  for(let i=0;i<words.length;i++){
-    if(skipNext){skipNext=false;continue;}
-    const w=words[i];
-    if(STOPWORDS.has(w)) continue;
-    if(TYPE_KEYS[w]) continue;
-    if(/^\d+([.,]\d+)?$/.test(w)) continue;
-    if(w==='dia'&&words[i+1]&&/^\d+$/.test(words[i+1])){skipNext=true;continue;}
-    if(['reais','real','r$','rs'].includes(w)) continue;
-    descWords.push(w);
-    if(descWords.length>=3) break; // máx 3 palavras na descrição
+  // ── CONTA — varredura completa do texto ──
+  let account = 'corrente';
+  // testa bigramas e unigrams
+  for (let i = 0; i < words.length - 1; i++) {
+    const bigram = words[i] + ' ' + words[i+1];
+    if (CONTA_KEYS[bigram]) { account = CONTA_KEYS[bigram]; break; }
   }
-  const description=descWords.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')||'Lançamento';
+  if (account === 'corrente') {
+    for (const w of words) { if (CONTA_KEYS[w]) { account = CONTA_KEYS[w]; break; } }
+  }
 
-  return {type,amount,description,category,date,account:'corrente'};
+  // ── CATEGORIA — varredura bigramas + unigrams ──
+  let category = type === 'receita' ? 'salario' : 'outros';
+  // bigramas primeiro (mais específicos)
+  for (let i = 0; i < words.length - 1; i++) {
+    const bigram = words[i] + ' ' + words[i+1];
+    if (CAT_KEYS[bigram]) { category = CAT_KEYS[bigram]; break; }
+  }
+  if (category === 'outros' || (type === 'receita' && category === 'salario')) {
+    for (const w of words) {
+      if (CAT_KEYS[w]) { category = CAT_KEYS[w]; break; }
+    }
+  }
+  // varredura substring para palavras compostas no texto (ex: "bar da esquina" contém "bar")
+  if (category === 'outros') {
+    for (const [k, v] of Object.entries(CAT_KEYS)) {
+      if (raw.includes(k)) { category = v; break; }
+    }
+  }
+
+  // ── DESCRIÇÃO — estratégia melhorada ──
+  // 1) Tenta capturar "no/na/em/do/da NOME" — nome após preposição de lugar
+  let description = '';
+  const prepPattern = /\b(?:no|na|em|do|da|num|numa|pelo|pela)\s+([a-záàãâéêíóôúç][a-záàãâéêíóôúç\s]{1,30}?)(?:\s+(?:hoje|ontem|amanhã|dia|\d)|$)/i;
+  const prepMatch = raw.match(prepPattern);
+  if (prepMatch) {
+    description = prepMatch[1].trim();
+  }
+
+  // 2) Se não achou via preposição, pega palavras relevantes (não-stopword, não-número, não-tipo, não-conta)
+  if (!description) {
+    const ignoreWords = new Set([
+      ...STOPWORDS,
+      ...Object.keys(TYPE_KEYS),
+      ...Object.keys(CONTA_KEYS),
+      'dia', 'hoje', 'ontem', 'amanhã', 'amanha', 'semana', 'mês', 'mes'
+    ]);
+    let descWords = [];
+    let skipNext = false;
+    for (let i = 0; i < words.length; i++) {
+      if (skipNext) { skipNext = false; continue; }
+      const w = words[i];
+      if (ignoreWords.has(w)) continue;
+      if (/^\d+([.,]\d+)?$/.test(w)) continue;
+      if (w === 'dia' && words[i+1] && /^\d+$/.test(words[i+1])) { skipNext = true; continue; }
+      descWords.push(w);
+      if (descWords.length >= 3) break;
+    }
+    description = descWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  // Capitalizar corretamente
+  description = description.split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+    .trim() || 'Lançamento';
+
+  return { type, amount, description, category, date, account };
 }
 
 function fillExample(el){
@@ -769,52 +882,92 @@ async function confirmVoiceTx(){
 }
 function cancelVoiceTx(){pendingVoiceTx=null;document.getElementById('voice-preview').style.display='none';}
 
-// ── VOZ ─────────────────────────────────────────────────────────────────────
+// ── VOZ (Safari iOS compatível) ──────────────────────────────────────────────
 function initVoice(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRecognition){document.getElementById('voice-btn').title='Voz não disponível neste navegador';return;}
-  recognition=new SpeechRecognition();
-  recognition.lang='pt-BR'; recognition.continuous=false; recognition.interimResults=true;
-  recognition.onstart=()=>{
-    isListening=true;
-    document.getElementById('voice-btn').classList.add('listening');
-    document.getElementById('voice-box').classList.add('active');
-    document.getElementById('voice-box').innerHTML='<div class="voice-dots"><span></span><span></span><span></span></div><span>Ouvindo... fale agora</span>';
-  };
-  recognition.onresult=e=>{
-    let interim='', final='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal) final+=e.results[i][0].transcript;
-      else interim+=e.results[i][0].transcript;
-    }
-    const current=final||interim;
-    document.getElementById('voice-display').textContent=current||'Ouvindo...';
-    document.getElementById('txt-input').value=current;
-  };
-  recognition.onend=()=>{
-    isListening=false;
-    document.getElementById('voice-btn').classList.remove('listening');
-    const txt=document.getElementById('txt-input').value.trim();
-    if(txt){
-      const vb=document.getElementById('voice-box');
-      vb.innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><span id="voice-display">${txt}</span>`;
-    } else {
-      document.getElementById('voice-box').classList.remove('active');
-      document.getElementById('voice-box').innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><span id="voice-display">Clique no microfone ou escreva abaixo...</span>`;
-    }
-  };
-  recognition.onerror=e=>{
-    isListening=false;
-    document.getElementById('voice-btn').classList.remove('listening');
-    if(e.error==='not-allowed') toast('Permissão de microfone negada',false);
-    else if(e.error!=='no-speech') toast('Erro no reconhecimento: '+e.error,false);
-  };
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('voice-btn').title = 'Voz não disponível. Use Safari/Chrome.';
+    document.getElementById('voice-btn').style.opacity = '0.4';
+    return;
+  }
+  // Não inicializa o objeto aqui — cria sob demanda no clique (Safari exige gesto direto)
+  window._SpeechRecognition = SpeechRecognition;
 }
 function toggleVoice(){
-  if(!recognition){toast('Voz não suportada neste navegador. Use Chrome.',false);return;}
-  if(isListening){recognition.stop();}
-  else{document.getElementById('txt-input').value='';recognition.start();}
+  if (!window._SpeechRecognition) {
+    toast('Reconhecimento de voz não suportado neste navegador', false);
+    return;
+  }
+  if (isListening) {
+    if (recognition) recognition.stop();
+    return;
+  }
+  // Cria nova instância a cada clique — Safari iOS requer isso
+  recognition = new window._SpeechRecognition();
+  recognition.lang = 'pt-BR';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('voice-btn').classList.add('listening');
+    document.getElementById('voice-box').classList.add('active');
+    document.getElementById('voice-box').innerHTML =
+      '<div class="voice-dots"><span></span><span></span><span></span></div><span>Ouvindo... fale agora</span>';
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const current = (final || interim).trim();
+    if (current) {
+      document.getElementById('txt-input').value = current;
+      const vd = document.getElementById('voice-display');
+      if (vd) vd.textContent = current;
+    }
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    const txt = document.getElementById('txt-input').value.trim();
+    const vb = document.getElementById('voice-box');
+    if (txt) {
+      vb.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><span id="voice-display">${txt}</span>`;
+    } else {
+      vb.classList.remove('active');
+      vb.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><span id="voice-display">Clique no microfone ou escreva abaixo...</span>`;
+    }
+    recognition = null;
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    recognition = null;
+    document.getElementById('voice-btn').classList.remove('listening');
+    if (e.error === 'not-allowed') {
+      toast('Permissão de microfone negada. Verifique as configurações do Safari.', false);
+    } else if (e.error === 'no-speech') {
+      toast('Nenhuma fala detectada. Tente novamente.', false);
+    } else {
+      toast('Erro no microfone: ' + e.error, false);
+    }
+    document.getElementById('voice-box').classList.remove('active');
+  };
+
+  // Safari: start direto no handler do clique (sem setTimeout ou Promise)
+  try {
+    recognition.start();
+  } catch(err) {
+    toast('Erro ao iniciar microfone: ' + err.message, false);
+    recognition = null;
+  }
 }
+
 
 // ── RECORRENTES ─────────────────────────────────────────────────────────────
 async function addRecurring(){
@@ -823,13 +976,21 @@ async function addRecurring(){
   const cat=document.getElementById('r-cat').value;
   const dia=parseInt(document.getElementById('r-dia').value);
   const conta=document.getElementById('r-conta').value;
+  const durTipo=document.getElementById('r-duracao').value;
+  const durVal=parseInt(document.getElementById('r-duracao-val').value)||0;
   if(!desc){toast('Informe a descrição',false);return;}
   if(!valor||isNaN(valor)){toast('Informe o valor',false);return;}
   if(!dia||dia<1||dia>31){toast('Informe um dia válido (1-31)',false);return;}
-  const r={id:uid(),desc,amount:valor,category:cat,day:dia,account:conta};
+  if(durTipo!=='forever'&&(!durVal||durVal<1)){toast('Informe a duração',false);return;}
+  const r={id:uid(),desc,amount:valor,category:cat,day:dia,account:conta,
+    durType:durTipo,durValue:durVal,startYear:selYear,startMonth:selMonth,timesLaunched:0};
   await dbPut('recurring',r);
   recurring.push(r);
-  document.getElementById('r-desc').value=''; document.getElementById('r-valor').value=''; document.getElementById('r-dia').value='';
+  document.getElementById('r-desc').value='';
+  document.getElementById('r-valor').value='';
+  document.getElementById('r-dia').value='';
+  document.getElementById('r-duracao').value='forever';
+  document.getElementById('r-duracao-val-wrap').style.display='none';
   renderRecurring(); toast('Recorrente adicionada! ✓');
 }
 
@@ -840,6 +1001,9 @@ async function launchRecurring(id){
   const tx={id:uid(),type:'despesa',amount:r.amount,description:r.desc,category:r.category,date:d,account:r.account,recurringRef:key,createdAt:Date.now()};
   await dbPut('transactions',tx);
   transactions.push(tx);
+  // Incrementar contador de lançamentos
+  r.timesLaunched=(r.timesLaunched||0)+1;
+  await dbPut('recurring',r);
   toast(r.desc+' lançada! ✓'); renderAll();
 }
 
@@ -850,6 +1014,17 @@ async function deleteRecurring(id){
   renderRecurring(); toast('Removida');
 }
 
+function recDuracaoLabel(r){
+  if(!r.durType||r.durType==='forever') return 'Indefinida';
+  const lançadas=r.timesLaunched||0;
+  if(r.durType==='months') return `${lançadas}/${r.durValue} meses`;
+  if(r.durType==='times')  return `${lançadas}/${r.durValue}x`;
+  return '';
+}
+function recIsExpired(r){
+  if(!r.durType||r.durType==='forever') return false;
+  return (r.timesLaunched||0)>=(r.durValue||999);
+}
 function renderRecurring(){
   const el=document.getElementById('rec-list');
   if(!recurring.length){el.innerHTML='<div class="empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg><span>Nenhuma despesa recorrente cadastrada</span></div>';return;}
@@ -857,12 +1032,17 @@ function renderRecurring(){
   el.innerHTML=sorted.map(r=>{
     const key=selYear+'-'+selMonth+'-'+r.id;
     const launched=transactions.some(t=>t.recurringRef===key);
-    return `<div class="rec-row card-sm" style="margin-bottom:var(--s2)">
+    const expired=recIsExpired(r);
+    const durLabel=recDuracaoLabel(r);
+    return `<div class="rec-row card-sm" style="margin-bottom:var(--s2);opacity:${expired?'.5':'1'}">
       <span class="rec-day">dia ${r.day}</span>
       <div class="tx-icon" style="background:${CAT_COLOR[r.category]||'#797876'}22">${CAT_EMOJI[r.category]||'📦'}</div>
-      <div style="flex:1"><div style="font-size:var(--sm);font-weight:500">${r.desc}</div><div style="font-size:var(--xs);color:var(--muted)">${r.account}</div></div>
+      <div style="flex:1">
+        <div style="font-size:var(--sm);font-weight:500">${r.desc}</div>
+        <div style="font-size:var(--xs);color:var(--muted)">${r.account} · ${durLabel}${expired?' · <span style='color:var(--err)'>Encerrada</span>':''}</div>
+      </div>
       <span style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(r.amount)}</span>
-      ${launched?'<span class="badge badge-green">✓ Lançado</span>':'<button class="btn btn-primary" style="font-size:var(--xs);padding:var(--s1) var(--s3)" onclick="launchRecurring(\''+r.id+'\')">Lançar</button>'}
+      ${expired?'<span class="badge badge-red">Encerrada</span>':launched?'<span class="badge badge-green">✓ Lançado</span>':'<button class="btn btn-primary" style="font-size:var(--xs);padding:var(--s1) var(--s3)" onclick="launchRecurring(''+r.id+'')">Lançar</button>'}
       <button onclick="deleteRecurring('${r.id}')" style="color:var(--faint);margin-left:var(--s2)" title="Remover">×</button>
     </div>`;
   }).join('');
@@ -957,12 +1137,47 @@ function renderAll(){
   }
 }
 
+
+// ── REPETIÇÃO E DURAÇÃO ──────────────────────────────────────────────────────
+function toggleRepeatCount(){
+  const v = document.getElementById('f-repeat').value;
+  document.getElementById('f-repeat-count-wrap').style.display = v !== 'none' ? '' : 'none';
+}
+
+function onRecDuracaoChange(){
+  const v = document.getElementById('r-duracao').value;
+  const wrap = document.getElementById('r-duracao-val-wrap');
+  const lbl  = document.getElementById('r-duracao-val-label');
+  if (v === 'forever') { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  lbl.textContent = v === 'months' ? 'Quantos meses' : 'Quantas vezes';
+}
+
+async function addRepeatTransactions(baseTx, repeat, count){
+  const INTERVALS = { weekly: 7, monthly: 30, yearly: 365 };
+  const added = [];
+  let d = new Date(baseTx.date + 'T12:00:00');
+  for (let i = 1; i < count; i++){
+    if (repeat === 'weekly')  d.setDate(d.getDate() + 7);
+    else if (repeat === 'monthly') d.setMonth(d.getMonth() + 1);
+    else if (repeat === 'yearly')  d.setFullYear(d.getFullYear() + 1);
+    const tx = {...baseTx, id: uid(), date: d.toISOString().split('T')[0], createdAt: Date.now()};
+    await dbPut('transactions', tx);
+    transactions.push(tx);
+    added.push(tx);
+  }
+  return added;
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init(){
   await openDB();
   [transactions,recurring,budgets]=await Promise.all([dbGetAll('transactions'),dbGetAll('recurring'),dbGetAll('budgets')]);
   initMonth();
   initVoice();
+  // Ligar onchange da duração recorrente
+  const rdel = document.getElementById('r-duracao');
+  if (rdel) rdel.addEventListener('change', onRecDuracaoChange);
   clearForm();
   renderDashboard();
   // solicita storage persistente
@@ -970,16 +1185,5 @@ async function init(){
 }
 init();
 </script>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(r => console.log('SW registrado:', r.scope))
-      .catch(e => console.log('SW erro:', e));
-  });
-}
-</script>
 </body>
 </html>
- 
